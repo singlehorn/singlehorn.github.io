@@ -1,0 +1,557 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#FFF">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="icon" type="image/ico" sizes="32x32" href="/images/favicon.ico">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+<link rel="alternate" type="application/rss+xml" title="保持好奇心" href="http://example.com/rss.xml" />
+<link rel="alternate" type="application/atom+xml" title="保持好奇心" href="http://example.com/atom.xml" />
+<link rel="alternate" type="application/json" title="保持好奇心" href="http://example.com/feed.json" />
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Mulish:300,300italic,400,400italic,700,700italic%7CFredericka%20the%20Great:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20JP:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20SC:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="/css/app.css?v=0.2.5">
+
+  
+  <meta name="keywords" content="Reverse" />
+
+
+<link rel="canonical" href="http://example.com/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/">
+
+
+
+  <title>
+LLVM Pass编写及去除 —— 间接跳转 - 学习 |
+Y&Yのblog = 保持好奇心</title>
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div id="loading">
+    <div class="cat">
+      <div class="body"></div>
+      <div class="head">
+        <div class="face"></div>
+      </div>
+      <div class="foot">
+        <div class="tummy-end"></div>
+        <div class="bottom"></div>
+        <div class="legs left"></div>
+        <div class="legs right"></div>
+      </div>
+      <div class="paw">
+        <div class="hands left"></div>
+        <div class="hands right"></div>
+      </div>
+    </div>
+  </div>
+  <div id="container">
+    <header id="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="inner">
+        <div id="brand">
+          <div class="pjax">
+          
+  <h1 itemprop="name headline">LLVM Pass编写及去除 —— 间接跳转
+  </h1>
+  
+<div class="meta">
+  <span class="item" title="Created: 2026-07-08 00:00:00">
+    <span class="icon">
+      <i class="ic i-calendar"></i>
+    </span>
+    <span class="text">Posted on</span>
+    <time itemprop="dateCreated datePublished" datetime="2026-07-08T00:00:00+08:00">2026-07-08</time>
+  </span>
+</div>
+
+
+          </div>
+        </div>
+        <nav id="nav">
+  <div class="inner">
+    <div class="toggle">
+      <div class="lines" aria-label="Toggle navigation bar">
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+      </div>
+    </div>
+    <ul class="menu">
+      <li class="item title"><a href="/" rel="start">Y&Yのblog</a></li>
+    </ul>
+    <ul class="right">
+      <li class="item theme">
+        <i class="ic i-sun"></i>
+      </li>
+      <li class="item search">
+        <i class="ic i-search"></i>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+      </div>
+      <div id="imgs" class="pjax">
+        <ul>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/68ff2d4e3203f7be00a6a314.png"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/68ff2d053203f7be00a6a080.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/6a1822c8105bdfb81150a943.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/6a1822d3105bdfb81150a944.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/69d5eb7bfe07599d0e205d81.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/68ff2d3a3203f7be00a6a25d.png"></li>
+        </ul>
+      </div>
+    </header>
+    <div id="waves">
+      <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+          <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax">
+          <use xlink:href="#gentle-wave" x="48" y="0" />
+          <use xlink:href="#gentle-wave" x="48" y="3" />
+          <use xlink:href="#gentle-wave" x="48" y="5" />
+          <use xlink:href="#gentle-wave" x="48" y="7" />
+        </g>
+      </svg>
+    </div>
+    <main>
+      <div class="inner">
+        <div id="main" class="pjax">
+          
+  <div class="article wrap">
+    
+<div class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+<i class="ic i-home"></i>
+<span><a href="/">Home</a></span><i class="ic i-angle-right"></i>
+<span  class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/%E5%AD%A6%E4%B9%A0/" itemprop="item" rel="index" title="In 学习"><span itemprop="name">学习</span></a>
+<meta itemprop="position" content="1" /></span>
+</div>
+
+    <article itemscope itemtype="http://schema.org/Article" class="post block" lang="en">
+  <link itemprop="mainEntityOfPage" href="http://example.com/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/">
+
+  <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="image" content="/images/avatar.jpg">
+    <meta itemprop="name" content="Y&Y">
+    <meta itemprop="description" content=", ">
+  </span>
+
+  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="保持好奇心">
+  </span>
+
+  <div class="body md" itemprop="articleBody">
+    
+
+    <p>间接跳转是通过将原本的 jmp addr 指令，替换成 jmp reg，从而混淆块与块之间的跳转关系的方法。</p>
+<h2 id="编写"><a class="markdownIt-Anchor" href="#编写">#</a> 编写</h2>
+<p>一个最基础的间接跳转 pass 如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Function.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Pass.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Support/raw_ostream.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Support/CommandLine.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Transforms/Utils/ValueMapper.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Transforms/Utils/Cloning.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Module.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Instructions.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/IRBuilder.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;SplitBasicBlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Utils.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ctime&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::vector;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> llvm;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> cl::opt&lt;<span class="type">bool</span>&gt; <span class="title">enableIndBr</span><span class="params">(<span class="string">&quot;indbr_num&quot;</span>,cl::init(<span class="number">1</span>),cl::desc(<span class="string">&quot;Indirect branch obfuscation&quot;</span>))</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span>&#123;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">IndirectBranch</span> : <span class="keyword">public</span> FunctionPass&#123;</span><br><span class="line">        <span class="keyword">public</span>:</span><br><span class="line">        <span class="type">static</span> <span class="type">char</span> ID;</span><br><span class="line">        <span class="built_in">IndirectBranch</span>() :<span class="built_in">FunctionPass</span>(ID)&#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="type">bool</span> <span class="title">runOnFunction</span><span class="params">(Function &amp;F)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">applyIndirectJump</span><span class="params">(BasicBlock *BB)</span></span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">IndirectBranch::runOnFunction</span><span class="params">(Function &amp;F)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    vector&lt;BasicBlock *&gt; origBB;</span><br><span class="line">    <span class="keyword">for</span>(BasicBlock &amp;BB : F)</span><br><span class="line">    &#123;</span><br><span class="line">        origBB.<span class="built_in">push_back</span>(&amp;BB);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(BasicBlock *BB : origBB)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">applyIndirectJump</span>(BB);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">IndirectBranch::applyIndirectJump</span><span class="params">(BasicBlock *BB)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Instruction *terminator = BB-&gt;<span class="built_in">getTerminator</span>();</span><br><span class="line">    BranchInst *br = <span class="built_in">dyn_cast</span>&lt;BranchInst&gt;(terminator);</span><br><span class="line">    <span class="keyword">if</span>(!br) <span class="keyword">return</span>;</span><br><span class="line">    <span class="comment">// 创建IRBuilder对象,在终结指令前插入</span></span><br><span class="line">    IRBuilder&lt;&gt; <span class="built_in">builder</span>(terminator);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 无条件跳转</span></span><br><span class="line">    <span class="keyword">if</span>(br-&gt;<span class="built_in">isUnconditional</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 获取目标块</span></span><br><span class="line">        BasicBlock *targetBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 获取目标地址</span></span><br><span class="line">        BlockAddress *targetAddr = BlockAddress::<span class="built_in">get</span>(targetBB);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建间接跳转指令(目标地址,可能地址数)</span></span><br><span class="line">        IndirectBrInst *indirectBr = builder.<span class="built_in">CreateIndirectBr</span>(targetAddr,<span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 添加有效目标块</span></span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(targetBB);</span><br><span class="line">        <span class="comment">// 删除原指令</span></span><br><span class="line">        br-&gt;<span class="built_in">eraseFromParent</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 有条件跳转</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(br-&gt;<span class="built_in">isConditional</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        Value *cond = br-&gt;<span class="built_in">getCondition</span>();</span><br><span class="line">        <span class="comment">// 获取真假目标块</span></span><br><span class="line">        BasicBlock *trueBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">0</span>);</span><br><span class="line">        BasicBlock *falseBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 真假目标地址</span></span><br><span class="line">        BlockAddress *trueAddr = BlockAddress::<span class="built_in">get</span>(trueBB);</span><br><span class="line">        BlockAddress *falseAddr = BlockAddress::<span class="built_in">get</span>(falseBB);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 条件选择指令</span></span><br><span class="line">        Value *selectedAddr = builder.<span class="built_in">CreateSelect</span>(cond,trueAddr,falseAddr);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建间接跳转指令</span></span><br><span class="line">        IndirectBrInst *indirectBr = builder.<span class="built_in">CreateIndirectBr</span>(selectedAddr,<span class="number">2</span>);</span><br><span class="line">        <span class="comment">// 添加可能的目标块</span></span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(trueBB);</span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(falseBB);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 删除原指令</span></span><br><span class="line">        br-&gt;<span class="built_in">eraseFromParent</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> IndirectBranch::ID = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="type">static</span> RegisterPass&lt;IndirectBranch&gt; <span class="title">X</span><span class="params">(<span class="string">&quot;indbr&quot;</span>,<span class="string">&quot;Indirect Branch Obfuscation Pass&quot;</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>经典的寄存器跳转，直接给 rax 赋值。一下就能看出跳转的地址</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4cba5f531aaa3c3f26aa2e.png" alt=""></p>
+<p>为了让混淆的效果更好，可以对地址进行加解密操作</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Function.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Pass.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Support/raw_ostream.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Support/CommandLine.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Transforms/Utils/ValueMapper.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/Transforms/Utils/Cloning.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Module.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/Instructions.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;llvm/IR/IRBuilder.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;SplitBasicBlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Utils.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ctime&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::vector;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> llvm;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> cl::opt&lt;<span class="type">bool</span>&gt; <span class="title">enableIndBr</span><span class="params">(<span class="string">&quot;indbr_num&quot;</span>,cl::init(<span class="number">1</span>),cl::desc(<span class="string">&quot;Indirect branch obfuscation&quot;</span>))</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span>&#123;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">IndirectBranch</span> : <span class="keyword">public</span> FunctionPass&#123;</span><br><span class="line">        <span class="keyword">public</span>:</span><br><span class="line">        <span class="type">static</span> <span class="type">char</span> ID;</span><br><span class="line">        <span class="built_in">IndirectBranch</span>() :<span class="built_in">FunctionPass</span>(ID)&#123;</span><br><span class="line">            <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="number">0</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="type">bool</span> <span class="title">runOnFunction</span><span class="params">(Function &amp;F)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">applyIndirectJump</span><span class="params">(BasicBlock *BB)</span></span>;</span><br><span class="line">        <span class="function">Value *<span class="title">createDecodedBlockAddress</span><span class="params">(IRBuilder&lt;&gt; &amp;builder, BasicBlock *targetBB, <span class="type">uint64_t</span> secretKey)</span></span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">IndirectBranch::runOnFunction</span><span class="params">(Function &amp;F)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">INIT_CONTEXT</span>(F);</span><br><span class="line">    vector&lt;BasicBlock *&gt; origBB;</span><br><span class="line">    <span class="keyword">for</span>(BasicBlock &amp;BB : F)</span><br><span class="line">    &#123;</span><br><span class="line">        origBB.<span class="built_in">push_back</span>(&amp;BB);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(BasicBlock *BB : origBB)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">applyIndirectJump</span>(BB);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Value *<span class="title">IndirectBranch::createDecodedBlockAddress</span><span class="params">(IRBuilder&lt;&gt; &amp;builder, BasicBlock *targetBB, <span class="type">uint64_t</span> secretKey)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Module *M = targetBB-&gt;<span class="built_in">getModule</span>();</span><br><span class="line">    <span class="type">const</span> DataLayout &amp;DL = M-&gt;<span class="built_in">getDataLayout</span>();</span><br><span class="line">    IntegerType *intPtrTy = DL.<span class="built_in">getIntPtrType</span>(*CONTEXT);</span><br><span class="line">    Type *int8PtrTy = Type::<span class="built_in">getInt8PtrTy</span>(*CONTEXT);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 目标地址</span></span><br><span class="line">    BlockAddress *targetAddr = BlockAddress::<span class="built_in">get</span>(targetBB);</span><br><span class="line">    <span class="comment">// 转为Int便于计算</span></span><br><span class="line">    Constant *targetInt = ConstantExpr::<span class="built_in">getPtrToInt</span>(targetAddr,intPtrTy);</span><br><span class="line">    Constant *keyVal = ConstantInt::<span class="built_in">get</span>(intPtrTy,secretKey);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 加密后的地址</span></span><br><span class="line">    Constant *encodedInit = ConstantExpr::<span class="built_in">getAdd</span>(targetInt,keyVal);</span><br><span class="line">    <span class="comment">// 生成全局变量名称</span></span><br><span class="line">    std::string globalName = targetBB-&gt;<span class="built_in">getParent</span>()-&gt;<span class="built_in">getName</span>().<span class="built_in">str</span>() + <span class="string">&quot;.indbr.addr&quot;</span>;</span><br><span class="line">    <span class="comment">// 创建全局变量 初始值为加密后的值</span></span><br><span class="line">    GlobalVariable *encodedSlot = <span class="keyword">new</span> <span class="built_in">GlobalVariable</span>(</span><br><span class="line">        *M,</span><br><span class="line">        intPtrTy,</span><br><span class="line">        <span class="literal">false</span>,</span><br><span class="line">        GlobalValue::PrivateLinkage,</span><br><span class="line">        encodedInit,</span><br><span class="line">        globalName</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 加载全局变量值</span></span><br><span class="line">    LoadInst *encodedVal = builder.<span class="built_in">CreateLoad</span>(intPtrTy,encodedSlot);</span><br><span class="line">    <span class="comment">// 设置不优化</span></span><br><span class="line">    encodedVal-&gt;<span class="built_in">setVolatile</span>(<span class="literal">true</span>);</span><br><span class="line">    <span class="comment">// 创建减法指令</span></span><br><span class="line">    Value *decodedVal = builder.<span class="built_in">CreateSub</span>(encodedVal,keyVal);</span><br><span class="line">    <span class="keyword">return</span> builder.<span class="built_in">CreateIntToPtr</span>(decodedVal,int8PtrTy);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">IndirectBranch::applyIndirectJump</span><span class="params">(BasicBlock *BB)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Instruction *terminator = BB-&gt;<span class="built_in">getTerminator</span>();</span><br><span class="line">    BranchInst *br = <span class="built_in">dyn_cast</span>&lt;BranchInst&gt;(terminator);</span><br><span class="line">    <span class="keyword">if</span>(!br) <span class="keyword">return</span>;</span><br><span class="line">    IRBuilder&lt;&gt; <span class="built_in">builder</span>(terminator);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 条件跳转</span></span><br><span class="line">    <span class="keyword">if</span>(br-&gt;<span class="built_in">isUnconditional</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        BasicBlock *targetBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">uint64_t</span> secretKey = <span class="built_in">rand</span>();</span><br><span class="line">        Value *decPtr = <span class="built_in">createDecodedBlockAddress</span>(builder,targetBB,secretKey);</span><br><span class="line"></span><br><span class="line">        IndirectBrInst *indirectBr = builder.<span class="built_in">CreateIndirectBr</span>(decPtr,<span class="number">1</span>);</span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(targetBB);</span><br><span class="line">        br-&gt;<span class="built_in">eraseFromParent</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 非条件跳转</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(br-&gt;<span class="built_in">isConditional</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        Value *cond = br-&gt;<span class="built_in">getCondition</span>();</span><br><span class="line">        <span class="comment">// 获取真假目标块</span></span><br><span class="line">        BasicBlock *trueBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">0</span>);</span><br><span class="line">        BasicBlock *falseBB = br-&gt;<span class="built_in">getSuccessor</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">uint64_t</span> secretKey = <span class="built_in">rand</span>();</span><br><span class="line">        <span class="comment">// 获取解密后的值</span></span><br><span class="line">        Value *decPtr_true = <span class="built_in">createDecodedBlockAddress</span>(builder,trueBB,secretKey);</span><br><span class="line">        Value *decPtr_false = <span class="built_in">createDecodedBlockAddress</span>(builder,falseBB,secretKey);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建选择指令</span></span><br><span class="line">        Value *selectedAddr = builder.<span class="built_in">CreateSelect</span>(cond,decPtr_true,decPtr_false);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建间接跳转指令</span></span><br><span class="line">        IndirectBrInst *indirectBr = builder.<span class="built_in">CreateIndirectBr</span>(selectedAddr,<span class="number">2</span>);</span><br><span class="line">        <span class="comment">// 添加可能的两个目标块</span></span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(trueBB);</span><br><span class="line">        indirectBr-&gt;<span class="built_in">addDestination</span>(falseBB);</span><br><span class="line"></span><br><span class="line">        br-&gt;<span class="built_in">eraseFromParent</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> IndirectBranch::ID = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="type">static</span> RegisterPass&lt;IndirectBranch&gt; <span class="title">X</span><span class="params">(<span class="string">&quot;indbr&quot;</span>,<span class="string">&quot;Indirect Branch Obfuscation Pass&quot;</span>)</span></span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>现在给寄存器赋的值需要通过全局变量去运算</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4ce313531aaa3c3f27b7d2.png" alt=""></p>
+<p>当然间接跳转混淆的方式多种多样，这里只是基础的两种 Pass 编写。</p>
+<h2 id="去除"><a class="markdownIt-Anchor" href="#去除">#</a> 去除</h2>
+<p>关于去除：</p>
+<p>有两种去除混淆的方式</p>
+<p>1. 通过 idc 脚本计算进行去除</p>
+<p>和之前去除控制流平坦化一样，通过 idc 脚本匹配特征再进行 patch，以上面的样本为例，读取全局变量的值后和一个 64 位值进行简单运算，可以根据特征 <code>jmp rax</code>  来定位间接跳转部分</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> jmp_insn = <span class="built_in">print_insn_mnem</span>(current_addr);</span><br><span class="line"><span class="keyword">auto</span> jmp_op = <span class="built_in">print_operand</span>(current_addr,<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(jmp_insn == <span class="string">&quot;jmp&quot;</span> &amp;&amp; jmp_op == <span class="string">&quot;rax&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>然后计算出全局变量的值和加的值</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> add_addr = <span class="built_in">prev_head</span>(current_addr,start_addr);</span><br><span class="line"><span class="keyword">auto</span> add_val = <span class="built_in">Dword</span>(add_addr + <span class="number">2</span>);</span><br><span class="line">add_val = add_val | <span class="number">0xFFFFFFFF00000000</span>;</span><br><span class="line"><span class="built_in">msg</span>(<span class="string">&quot;add val = %X\n&quot;</span>,add_val);</span><br><span class="line"><span class="keyword">auto</span> mov_addr = <span class="built_in">prev_head</span>(add_addr,start_addr);</span><br><span class="line"><span class="keyword">auto</span> rand_offset = <span class="built_in">Dword</span>(mov_addr + <span class="number">3</span>);</span><br><span class="line"><span class="keyword">auto</span> rand_addr = mov_addr + rand_offset + <span class="number">7</span>;</span><br><span class="line"><span class="built_in">msg</span>(<span class="string">&quot;rand addr = %X\n&quot;</span>,rand_addr);</span><br><span class="line"><span class="keyword">auto</span> rand_val = <span class="built_in">Dword</span>(rand_addr);</span><br><span class="line"><span class="keyword">auto</span> jmp_addr = add_val + rand_val;</span><br></pre></td></tr></table></figure>
+<p>最后 patch</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NopCode</span>(mov_addr,jmp_addr + <span class="number">2</span> - mov_addr);</span><br><span class="line"><span class="built_in">PatchByte</span>(mov_addr,<span class="number">0xE9</span>);</span><br><span class="line"><span class="built_in">PatchDword</span>(mov_addr + <span class="number">1</span>,jmp_offset);</span><br></pre></td></tr></table></figure>
+<p>完整脚本如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="title">NopCode</span><span class="params">(Addr, Length)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; Length; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">PatchByte</span>(Addr + i, <span class="number">0x90</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> current_addr = ;</span><br><span class="line">    <span class="keyword">auto</span> end_addr = ;</span><br><span class="line">    <span class="keyword">auto</span> start_addr = current_addr;</span><br><span class="line">    <span class="keyword">while</span> (current_addr &lt; end_addr &amp;&amp; current_addr != BADADDR)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">auto</span> jmp_insn = <span class="built_in">print_insn_mnem</span>(current_addr);</span><br><span class="line">        <span class="keyword">auto</span> jmp_op = <span class="built_in">print_operand</span>(current_addr,<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span>(jmp_insn == <span class="string">&quot;jmp&quot;</span> &amp;&amp; jmp_op == <span class="string">&quot;rax&quot;</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">auto</span> add_addr = <span class="built_in">prev_head</span>(current_addr,start_addr);</span><br><span class="line">            <span class="keyword">auto</span> add_val = <span class="built_in">Dword</span>(add_addr + <span class="number">2</span>);</span><br><span class="line">            add_val = add_val | <span class="number">0xFFFFFFFF00000000</span>;</span><br><span class="line">            <span class="built_in">msg</span>(<span class="string">&quot;add val = %X\n&quot;</span>,add_val);</span><br><span class="line">            <span class="keyword">auto</span> mov_addr = <span class="built_in">prev_head</span>(add_addr,start_addr);</span><br><span class="line">            <span class="keyword">auto</span> rand_offset = <span class="built_in">Dword</span>(mov_addr + <span class="number">3</span>);</span><br><span class="line">            <span class="keyword">auto</span> rand_addr = mov_addr + rand_offset + <span class="number">7</span>;</span><br><span class="line">            <span class="built_in">msg</span>(<span class="string">&quot;rand addr = %X\n&quot;</span>,rand_addr);</span><br><span class="line">            <span class="keyword">auto</span> rand_val = <span class="built_in">Dword</span>(rand_addr);</span><br><span class="line">            <span class="keyword">auto</span> jmp_addr = add_val + rand_val;</span><br><span class="line">            <span class="keyword">auto</span> jmp_offset = jmp_addr - mov_addr - <span class="number">5</span>;</span><br><span class="line">            <span class="built_in">msg</span>(<span class="string">&quot;jmp addr = %X\n&quot;</span>,jmp_addr);</span><br><span class="line">            <span class="built_in">msg</span>(<span class="string">&quot;jmp offset = %X\n&quot;</span>,jmp_offset);</span><br><span class="line">            <span class="built_in">NopCode</span>(mov_addr,jmp_addr + <span class="number">2</span> - mov_addr);</span><br><span class="line">            <span class="built_in">PatchByte</span>(mov_addr,<span class="number">0xE9</span>);</span><br><span class="line">            <span class="built_in">PatchDword</span>(mov_addr + <span class="number">1</span>,jmp_offset);</span><br><span class="line">        &#125;</span><br><span class="line">        current_addr = <span class="built_in">next_head</span>(current_addr,end_addr);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>(示例脚本仅为非条件跳转)</p>
+<p>运行后可自动将间接跳转改为直接跳转</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4e2d231f387c020937f51a.png" alt=""></p>
+<p>2. 自动下断点 trace 去除</p>
+<p>无论是怎样的间接跳转，执行到最后 jmp 指令的时候都会计算出值，所以动态获取值无疑是很好的办法。</p>
+<p>但是在一个混淆样本中 jmp 指令往往过多，调试去看值是不行的，所以可以使用 idc 批量下断点，再执行一遍，直接获取到跳转的值</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;idc.idc&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置断点Break属性</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">SetBptBreak</span><span class="params">(Address, Enable)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> OldFlag = <span class="built_in">get_bpt_attr</span>(Address, BPTATTR_FLAGS);</span><br><span class="line">    <span class="keyword">if</span> (Enable == <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ((OldFlag &amp; BPT_BRK) == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">msg</span>(<span class="string">&quot;%d\n&quot;</span>, OldFlag &amp; BPT_BRK);</span><br><span class="line">            OldFlag = OldFlag | BPT_BRK;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ((OldFlag &amp; BPT_BRK) != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            OldFlag = OldFlag &amp; (~BPT_BRK);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">set_bpt_attr</span>(Address, BPTATTR_FLAGS, OldFlag);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置断点Handler</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">SetHandlerToBpt</span><span class="params">(Address, HandlerFuncName, IsBreak)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// return回调到Handler</span></span><br><span class="line">    <span class="keyword">auto</span> Cond = <span class="built_in">sprintf</span>(<span class="string">&quot;return %s();&quot;</span>, HandlerFuncName);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">check_bpt</span>(Address) == (BPTCK_NONE))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">add_bpt</span>(Address);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置Break属性</span></span><br><span class="line">    <span class="built_in">SetBptBreak</span>(Address, IsBreak);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置断点Conditional</span></span><br><span class="line">    <span class="keyword">auto</span> Status = <span class="built_in">set_bpt_cond</span>(Address, Cond);</span><br><span class="line">    <span class="keyword">if</span> (Status == <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">msg</span>(<span class="string">&quot;Successfully set conditional bpt at 0x%x -&gt; call %s\n&quot;</span>, Address, HandlerFuncName);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">msg</span>(<span class="string">&quot;Failed to set conditional bpt at 0x%x\n&quot;</span>, Address);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">Handler1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> fp = <span class="built_in">fopen</span>(<span class="string">&quot;dump.txt&quot;</span>, <span class="string">&quot;a&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">fprintf</span>(fp, <span class="string">&quot;jmp %X -&gt; %X\n&quot;</span>,rip,rax);</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> start_addr = ;</span><br><span class="line">    <span class="keyword">auto</span> end_addr = ;</span><br><span class="line">    <span class="keyword">auto</span> current_addr = start_addr;</span><br><span class="line">    <span class="keyword">while</span>(current_addr &lt; end_addr &amp;&amp; current_addr != BADADDR)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">auto</span> insn_name = <span class="built_in">print_insn_mnem</span>(current_addr);</span><br><span class="line">        <span class="keyword">auto</span> op = <span class="built_in">print_operand</span>(current_addr,<span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 检查到jmp rax指令就对其下断 断点函数为Handler1</span></span><br><span class="line">        <span class="keyword">if</span>(insn_name == <span class="string">&quot;jmp&quot;</span> &amp;&amp; op == <span class="string">&quot;rax&quot;</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">SetHandlerToBpt</span>(current_addr, <span class="string">&quot;Handler1&quot;</span>, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        current_addr = <span class="built_in">next_head</span>(current_addr,end_addr);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为有循环，所以重复内容占了很多，可以写一个 python 脚本去重</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">file_path = <span class="string">&quot;dump.txt&quot;</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(file_path,<span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    lines = [line.rstrip(<span class="string">&#x27;\n&#x27;</span>) <span class="keyword">for</span> line <span class="keyword">in</span> f]</span><br><span class="line">set_line = <span class="built_in">set</span>(lines)</span><br><span class="line"><span class="keyword">for</span> s <span class="keyword">in</span> set_line:</span><br><span class="line">    <span class="built_in">print</span>(s)</span><br></pre></td></tr></table></figure>
+<p>结果如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">jmp 401581 -&gt; 401583</span><br><span class="line">jmp 4015AA -&gt; 4015AC</span><br><span class="line">jmp 4013D4 -&gt; 4013D6</span><br><span class="line">jmp 4015E6 -&gt; 401583</span><br><span class="line">jmp 4013A5 -&gt; 4013A7</span><br><span class="line">jmp 4015CE -&gt; 4015D0</span><br><span class="line">jmp 4014FA -&gt; 4013A7</span><br><span class="line">jmp 4014D9 -&gt; 4014DB</span><br><span class="line">jmp 4013D4 -&gt; 4014FC</span><br><span class="line">jmp 4015AA -&gt; 4015E8</span><br></pre></td></tr></table></figure>
+<p>这样我们就获取到了关键的跳转关系表，可通过脚本或 ai 辅助 patch</p>
+<h2 id="实例"><a class="markdownIt-Anchor" href="#实例">#</a> 实例</h2>
+<p>样本为 strange_xor.exe，混淆方式如图</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4d2b75531aaa3c3f29a513.png" alt=""></p>
+<p>这一段汇编中只有中间的 <code>push ebp</code>  是真正有用的程序代码，其余全部为间接跳转服务。</p>
+<p>最终跳转的计算公式为 0x77 ^ 0x9908 + 0x393017 = 0x39C996</p>
+<p>虽然是通过复杂的方式对最终跳转的值进行计算，但因为混淆的方式是固定的：赋值 + 取值 + 赋值 + 跳转，所以可以写 idc 脚本来匹配特征去混淆</p>
+<p>脚本如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;idc.idc&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">NopCode</span><span class="params">(Addr, Length)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; Length; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">PatchByte</span>(Addr + i, <span class="number">0x90</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> current_addr = <span class="number">0x40C996</span>;</span><br><span class="line">    <span class="keyword">auto</span> end_addr = current_addr + <span class="number">0x10000</span>;</span><br><span class="line">    <span class="comment">// 初始保存的ecx值</span></span><br><span class="line">    <span class="keyword">auto</span> ecx_data = <span class="number">0x35</span>;</span><br><span class="line">    <span class="keyword">while</span> (current_addr != BADADDR &amp;&amp; current_addr &lt; end_addr)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">auto</span> insn_name = <span class="built_in">Byte</span>(current_addr);</span><br><span class="line">        <span class="keyword">auto</span> op = <span class="built_in">print_operand</span>(current_addr, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">auto</span> op2 = <span class="built_in">print_operand</span>(current_addr, <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">auto</span> i;</span><br><span class="line">        <span class="comment">///msg(&quot;addr: %X\n&quot;,current_addr);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 找到pusha这条指令</span></span><br><span class="line">        <span class="keyword">if</span>( insn_name == <span class="number">0x60</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">auto</span> asm_name = <span class="built_in">Byte</span>(current_addr + <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">auto</span> call_asm_name = <span class="built_in">Byte</span>(current_addr + <span class="number">2</span>);</span><br><span class="line">            <span class="keyword">auto</span> call_op = <span class="built_in">Dword</span>(current_addr + <span class="number">3</span>);</span><br><span class="line">            <span class="comment">//msg(&quot;pusha\n&quot;);</span></span><br><span class="line">            <span class="comment">// jmp ebx</span></span><br><span class="line">            <span class="comment">// 接下来的两条汇编是否为pushf + call $5</span></span><br><span class="line">            <span class="keyword">if</span>( asm_name == <span class="number">0x9C</span> &amp;&amp; call_asm_name == <span class="number">0xE8</span> &amp;&amp; call_op == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">auto</span> pop_addr = current_addr + <span class="number">7</span>;</span><br><span class="line">                <span class="keyword">auto</span> xor_addr = current_addr + <span class="number">16</span>;</span><br><span class="line">                <span class="comment">//msg(&quot;xor_addr : %X\n&quot;,xor_addr);</span></span><br><span class="line">                <span class="keyword">auto</span> xor_data = <span class="built_in">Dword</span>(xor_addr + <span class="number">2</span>);</span><br><span class="line">                <span class="keyword">auto</span> offest = ecx_data ^ xor_data;</span><br><span class="line">                <span class="comment">//msg(&quot;xor_data : %X\n&quot;,xor_data);</span></span><br><span class="line">                <span class="comment">// 计算出跳转的值</span></span><br><span class="line">                <span class="keyword">auto</span> jmp_addr = (offest + pop_addr) &amp; <span class="number">0xFFFFFFFF</span>;</span><br><span class="line">                <span class="built_in">msg</span>(<span class="string">&quot;jmp_addr : %X\n&quot;</span>,jmp_addr);</span><br><span class="line">                <span class="keyword">auto</span> ecx_addr = xor_addr + <span class="number">9</span>;</span><br><span class="line">                <span class="comment">// 计算出跳转偏移</span></span><br><span class="line">                <span class="keyword">auto</span> jmp_offest = jmp_addr - ecx_addr - <span class="number">5</span>;</span><br><span class="line">                <span class="comment">// 顺带保存下一次运算的ecx值</span></span><br><span class="line">                ecx_data = <span class="built_in">Dword</span>(ecx_addr + <span class="number">1</span>);</span><br><span class="line">                <span class="built_in">msg</span>(<span class="string">&quot;ecx_data : %X\n&quot;</span>,ecx_data);</span><br><span class="line">                <span class="built_in">NopCode</span>(current_addr,<span class="number">39</span>);</span><br><span class="line">                <span class="comment">//msg(&quot;nop_addr: %X  len: %X\n&quot;,current_addr,39);</span></span><br><span class="line">                <span class="built_in">PatchByte</span>(ecx_addr,<span class="number">0xE9</span>);</span><br><span class="line">                <span class="built_in">PatchDword</span>(ecx_addr + <span class="number">1</span>,jmp_offest);</span><br><span class="line">                <span class="comment">//msg(&quot;jmp  %X\n&quot;,jmp_addr);</span></span><br><span class="line">                <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="number">54</span>; i++)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="built_in">create_insn</span>(jmp_addr + i);</span><br><span class="line">                &#125;</span><br><span class="line">                current_addr = jmp_addr;</span><br><span class="line">                <span class="built_in">msg</span>(<span class="string">&quot;current_addr: %X\n&quot;</span>,current_addr);</span><br><span class="line">                <span class="keyword">auto</span> next_call_insn = <span class="built_in">Byte</span>(current_addr);</span><br><span class="line">                <span class="keyword">auto</span> next_call_op = <span class="built_in">Dword</span>(current_addr + <span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span>( next_call_insn == <span class="number">0xE8</span> &amp;&amp; next_call_op == <span class="number">0</span> )</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">auto</span> pop_byte = <span class="built_in">Byte</span>(current_addr + <span class="number">5</span>);</span><br><span class="line">                    <span class="keyword">if</span>( pop_byte == <span class="number">0x5B</span>)</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="built_in">NopCode</span>(current_addr - <span class="number">1</span>,<span class="number">12</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">auto</span> check_byte = <span class="built_in">Byte</span>(current_addr); </span><br><span class="line">        <span class="keyword">if</span>( check_byte == <span class="number">0x9D</span> || check_byte == <span class="number">0x61</span> || check_byte == <span class="number">0x60</span> || check_byte == <span class="number">0x9C</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">NopCode</span>(current_addr,<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        current_addr = current_addr + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>效果如下</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4e00b31f387c020936302d.png" alt=""></p>
+<p>只留下了有用的汇编和跳转地址，其余全部被 nop</p>
+<p>函数可正常反编译</p>
+<p><img data-src="https://pic1.imgdb.cn/item/6a4e07001f387c0209369173.png" alt=""></p>
+<p>当然除写 idc 脚本之外还可以下断点动态 trace，只需要将刚才的脚本稍加修改</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="title">Handler1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> fp = <span class="built_in">fopen</span>(<span class="string">&quot;dump.txt&quot;</span>, <span class="string">&quot;a&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">fprintf</span>(fp, <span class="string">&quot;jmp %X -&gt; %X\n&quot;</span>,eip,ebx);</span><br><span class="line">    <span class="built_in">fclose</span>(fp);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> start_addr = <span class="number">0x403001</span>;</span><br><span class="line">    <span class="keyword">auto</span> end_addr = <span class="number">0x413C98</span>;</span><br><span class="line">    <span class="keyword">auto</span> current_addr = start_addr;</span><br><span class="line">    <span class="keyword">while</span>(current_addr &lt; end_addr &amp;&amp; current_addr != BADADDR)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">auto</span> insn_name = <span class="built_in">print_insn_mnem</span>(current_addr);</span><br><span class="line">        <span class="keyword">auto</span> op = <span class="built_in">print_operand</span>(current_addr,<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span>(insn_name == <span class="string">&quot;jmp&quot;</span> &amp;&amp; op == <span class="string">&quot;ebx&quot;</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">SetHandlerToBpt</span>(current_addr, <span class="string">&quot;Handler1&quot;</span>, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        current_addr = <span class="built_in">next_head</span>(current_addr,end_addr);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就可以得到跳转表。部分跳转表如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">jmp 4068F4 -&gt; 41207E</span><br><span class="line">jmp 404D77 -&gt; 40C281</span><br><span class="line">jmp 40E202 -&gt; 407CB0</span><br><span class="line">jmp 404155 -&gt; 410C62</span><br><span class="line">jmp 40A019 -&gt; 40AA11</span><br><span class="line">jmp 4057F3 -&gt; 4139A5</span><br><span class="line">jmp 40BFA4 -&gt; 41212A</span><br><span class="line">jmp 40B340 -&gt; 4036FB</span><br><span class="line">jmp 413AC2 -&gt; 406A8F</span><br><span class="line">jmp 40C789 -&gt; 40D40E</span><br><span class="line">jmp 40E652 -&gt; 407150</span><br><span class="line">jmp 40FFC7 -&gt; 40CBDA</span><br><span class="line">jmp 40A6BC -&gt; 404A8A</span><br><span class="line">jmp 40B8CD -&gt; 4076D9</span><br><span class="line">jmp 406C5F -&gt; 409DFB</span><br><span class="line">jmp 408170 -&gt; 40A32B</span><br><span class="line">jmp 40C74F -&gt; 4127E1</span><br><span class="line">jmp 40DBE5 -&gt; 412CFA</span><br><span class="line">jmp 40D4EB -&gt; 40C7FE</span><br><span class="line">jmp 411949 -&gt; 413489</span><br></pre></td></tr></table></figure>
+<p>符合我们刚才 patch 过的代码。</p>
+<h2 id="最后"><a class="markdownIt-Anchor" href="#最后">#</a> 最后</h2>
+<p>以上就是关于间接跳转的 Pass 编写，还有混淆去除的方法，当然都是我个人拙见，如果有问题或其他思路欢迎各位大佬和我交流☆*: .｡. o (≧▽≦) o .｡.:*☆</p>
+<hr>
+<p>最后的最后，虽然有这些去除混淆的方法，但是实际应用是还是要逐个样本分析，没有一把梭的方法。所以我想借助 agent 来辅助去混淆，这需要很多混淆样本。所以如果各位大佬有小型混淆样本 / CTF 题目，都可以分享给我 orz。</p>
+<p>qq：2060824185</p>
+
+      <div class="tags">
+          <a href="/tags/Reverse/" rel="tag"><i class="ic i-tag"></i> Reverse</a>
+      </div>
+  </div>
+
+   <footer>
+
+    <div class="meta">
+</div>
+
+      
+
+<div id="copyright">
+<ul>
+  <li class="author">
+    <strong>Post author:  </strong>Y&Y <i class="ic i-at"><em>@</em></i>保持好奇心
+  </li>
+  <li class="link">
+    <strong>Post link: </strong>
+    <a href="http://example.com/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/" title="LLVM Pass编写及去除 —— 间接跳转">http://example.com/2026/07/08/LLVM Pass编写及去除 —— 间接跳转/</a>
+  </li>
+  <li class="license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <span class="exturl" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC9kZWVkLnpo"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</span> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+  </footer>
+
+</article>
+
+  </div>
+  
+
+<div class="post-nav">
+    <div class="item left">
+      
+
+  <a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;pic1.imgdb.cn&#x2F;item&#x2F;69d5ec57fe07599d0e205f2c.png" title="梆梆加固分析">
+  <span class="type">Previous Post</span>
+  <span class="category"><i class="ic i-flag"></i> 学习</span>
+  <h3>梆梆加固分析</h3>
+  </a>
+
+    </div>
+    <div class="item right">
+      
+
+  <a href="/2026/07/17/%E5%AE%9E%E6%88%98%E5%8E%BB%E9%99%A4%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8%E4%B8%AD%E7%9A%84%E5%A4%9A%E7%A7%8D%E6%B7%B7%E6%B7%86/" itemprop="url" rel="next" data-background-image="https:&#x2F;&#x2F;pic1.imgdb.cn&#x2F;item&#x2F;68ff2d643203f7be00a6a3e0.png" title="实战去除安卓应用中的多种混淆">
+  <span class="type">Next Post</span>
+  <span class="category"><i class="ic i-flag"></i> 实战</span>
+  <h3>实战去除安卓应用中的多种混淆</h3>
+  </a>
+
+    </div>
+</div>
+
+  
+  <div class="wrap" id="comments"></div>
+
+
+        </div>
+        <div id="sidebar">
+          
+
+<div class="inner">
+
+  <div class="panels">
+    <div class="inner">
+      <div class="contents panel pjax" data-title="Contents">
+          <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E5%86%99"><span class="toc-number">1.</span> <span class="toc-text"> 编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%BB%E9%99%A4"><span class="toc-number">2.</span> <span class="toc-text"> 去除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text"> 实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-number">4.</span> <span class="toc-text"> 最后</span></a></li></ol>
+      </div>
+      <div class="related panel pjax" data-title="Related">
+        <ul>
+          <li><a href="/2026/04/15/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96/" rel="bookmark" title="LLVM Pass编写及去除 —— 控制流平坦化">LLVM Pass编写及去除 —— 控制流平坦化</a></li><li><a href="/2026/04/28/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%E2%80%94%E2%80%94%E8%99%9A%E5%81%87%E6%8E%A7%E5%88%B6%E6%B5%81/" rel="bookmark" title="LLVM Pass编写及去除——虚假控制流">LLVM Pass编写及去除——虚假控制流</a></li><li><a href="/2026/05/11/Android%E4%B8%80%E4%BA%8C%E4%B8%89%E4%BB%A3%E5%A3%B3%E5%AE%9E%E7%8E%B0/" rel="bookmark" title="Android一二三代壳实现">Android一二三代壳实现</a></li><li><a href="/2026/05/11/%E5%88%86%E6%9E%90%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AEDPT%E6%8A%BD%E5%8F%96%E5%A3%B3%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" rel="bookmark" title="分析开源项目DPT抽取壳源码实现">分析开源项目DPT抽取壳源码实现</a></li><li><a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" rel="bookmark" title="梆梆加固分析">梆梆加固分析</a></li><li class="active"><a href="/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/" rel="bookmark" title="LLVM Pass编写及去除 —— 间接跳转">LLVM Pass编写及去除 —— 间接跳转</a></li>
+        </ul>
+      </div>
+      <div class="overview panel" data-title="Overview">
+        <div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="image" itemprop="image" alt="Y&Y"
+      data-src="/images/avatar.jpg">
+  <p class="name" itemprop="name">Y&Y</p>
+  <div class="description" itemprop="description"></div>
+</div>
+
+<nav class="state">
+    <div class="item posts">
+      <a href="/archives/">
+        <span class="count">13</span>
+        <span class="name">posts</span>
+      </a>
+    </div>
+    <div class="item categories">
+      <a href="/categories/">
+        <span class="count">5</span>
+        <span class="name">categories</span>
+      </a>
+    </div>
+    <div class="item tags">
+      <a href="/tags/">
+        <span class="count">1</span>
+        <span class="name">tags</span>
+      </a>
+    </div>
+</nav>
+
+<div class="social">
+      <span class="exturl item github" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NpbmdsZWhvcm4=" title="https:&#x2F;&#x2F;github.com&#x2F;singlehorn"><i class="ic i-github"></i></span>
+      <span class="exturl item about" data-url="aHR0cHM6Ly9hYm91dC5tZS95b3VybmFtZQ==" title="https:&#x2F;&#x2F;about.me&#x2F;yourname"><i class="ic i-address-card"></i></span>
+</div>
+
+<ul class="menu">
+  
+    
+  <li class="item">
+    <a href="/" rel="section"><i class="ic i-home"></i>Home</a>
+  </li>
+
+    
+  <li class="item">
+    <a href="/about/" rel="section"><i class="ic i-user"></i>About</a>
+  </li>
+
+        
+  <li class="item dropdown">
+      <a href="javascript:void(0);"><i class="ic i-feather"></i>Posts</a>
+    <ul class="submenu">
+
+        
+  <li class="item">
+    <a href="/archives/" rel="section"><i class="ic i-list-alt"></i>Archives</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/categories/" rel="section"><i class="ic i-th"></i>Categories</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/tags/" rel="section"><i class="ic i-tags"></i>Tags</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/link/" rel="section"><i class="ic i-heart"></i>friends</a>
+  </li>
+
+  </ul>
+
+</ul>
+
+      </div>
+    </div>
+  </div>
+
+  <ul id="quick">
+    <li class="prev pjax">
+        <a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" rel="prev" title="Previous Post"><i class="ic i-chevron-left"></i></a>
+    </li>
+    <li class="up"><i class="ic i-arrow-up"></i></li>
+    <li class="down"><i class="ic i-arrow-down"></i></li>
+    <li class="next pjax">
+        <a href="/2026/07/17/%E5%AE%9E%E6%88%98%E5%8E%BB%E9%99%A4%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8%E4%B8%AD%E7%9A%84%E5%A4%9A%E7%A7%8D%E6%B7%B7%E6%B7%86/" rel="next" title="Next Post"><i class="ic i-chevron-right"></i></a>
+    </li>
+    <li class="percent"></li>
+  </ul>
+</div>
+
+
+        </div>
+        <div class="dimmer"></div>
+      </div>
+    </main>
+    <footer id="footer">
+      <div class="inner">
+        <div class="widgets">
+          
+<div class="rpost pjax">
+  <h2>Random Posts</h2>
+  <ul>
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%87%BA%E9%A2%98/" title="In 出题">出题</a>
+</div>
+
+    <span><a href="/2026/02/04/VNCTF2026%E5%87%BA%E9%A2%98%E7%AC%94%E8%AE%B0/" title="VNCTF2026出题笔记">VNCTF2026出题笔记</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/" title="LLVM Pass编写及去除 —— 间接跳转">LLVM Pass编写及去除 —— 间接跳转</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/wp/" title="In wp">wp</a>
+</div>
+
+    <span><a href="/2025/12/22/2025%20%E9%B9%8F%E7%A8%8B%E6%9D%AF%20%E9%80%86%E5%90%91%20wp/" title="2025 鹏程杯 逆向 wp">2025 鹏程杯 逆向 wp</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/wp/" title="In wp">wp</a>
+</div>
+
+    <span><a href="/2025/11/03/2025N1CTF%20%E9%80%86%E5%90%91wp/" title="2025N1CTF 逆向wp">2025N1CTF 逆向wp</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" title="梆梆加固分析">梆梆加固分析</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/wp/" title="In wp">wp</a>
+</div>
+
+    <span><a href="/2025/10/28/2025%E7%BE%8A%E5%9F%8E%E6%9D%AF%E9%80%86%E5%90%91wp/" title="2025羊城杯逆向wp">2025羊城杯逆向wp</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/05/11/Android%E4%B8%80%E4%BA%8C%E4%B8%89%E4%BB%A3%E5%A3%B3%E5%AE%9E%E7%8E%B0/" title="Android一二三代壳实现">Android一二三代壳实现</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AE%9E%E6%88%98/" title="In 实战">实战</a>
+</div>
+
+    <span><a href="/2026/07/17/%E5%AE%9E%E6%88%98%E5%8E%BB%E9%99%A4%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8%E4%B8%AD%E7%9A%84%E5%A4%9A%E7%A7%8D%E6%B7%B7%E6%B7%86/" title="实战去除安卓应用中的多种混淆">实战去除安卓应用中的多种混淆</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%A4%8D%E7%8E%B0/" title="In 复现">复现</a>
+</div>
+
+    <span><a href="/2025/11/01/%E9%A6%99%E5%B1%B1%E6%9D%AFNesting%E5%A4%8D%E7%8E%B0/" title="香山杯  - Nesting - 复现">香山杯  - Nesting - 复现</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/05/11/%E5%88%86%E6%9E%90%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AEDPT%E6%8A%BD%E5%8F%96%E5%A3%B3%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" title="分析开源项目DPT抽取壳源码实现">分析开源项目DPT抽取壳源码实现</a></span>
+  </li>
+
+  </ul>
+</div>
+<div>
+  <h2>Recent Comments</h2>
+  <ul class="leancloud-recent-comment"></ul>
+</div>
+
+        </div>
+        <div class="status">
+  <div class="copyright">
+    
+    &copy; 2025 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="ic i-sakura rotate"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Y&Y @ Y&Yのblog</span>
+  </div>
+  <div class="powered-by">
+    Powered by <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & Theme.<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2FtZWhpbWUvaGV4by10aGVtZS1zaG9rYQ==">Shoka</span>
+  </div>
+</div>
+
+      </div>
+    </footer>
+  </div>
+<script data-config type="text/javascript">
+  var LOCAL = {
+    path: '2026/07/08/LLVM Pass编写及去除 —— 间接跳转/',
+    favicon: {
+      show: "（●´3｀●）Goooood",
+      hide: "(´Д｀)Booooom"
+    },
+    search : {
+      placeholder: "Search for Posts",
+      empty: "We didn't find any results for the search: ${query}",
+      stats: "${hits} results found in ${time} ms"
+    },
+    valine: true,fancybox: true,
+    copyright: 'Copied to clipboard successfully! <br> All articles in this blog are licensed under <i class="ic i-creative-commons"></i>BY-NC-SA.',
+    ignores : [
+      function(uri) {
+        return uri.includes('#');
+      },
+      function(uri) {
+        return new RegExp(LOCAL.path+"$").test(uri);
+      }
+    ]
+  };
+</script>
+
+<script src="https://cdn.polyfill.io/v2/polyfill.js"></script>
+
+<script src="//cdn.jsdelivr.net/combine/npm/pace-js@1.0.2/pace.min.js,npm/pjax@0.2.8/pjax.min.js,npm/whatwg-fetch@3.4.0/dist/fetch.umd.min.js,npm/animejs@3.2.0/lib/anime.min.js,npm/algoliasearch@4/dist/algoliasearch-lite.umd.js,npm/instantsearch.js@4/dist/instantsearch.production.min.js,npm/lozad@1/dist/lozad.min.js,npm/quicklink@2/dist/quicklink.umd.js"></script>
+
+<script src="/js/app.js?v=0.2.5"></script>
+
+
+
+
+</body>
+</html>
